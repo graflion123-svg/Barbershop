@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Lock, Mail, ArrowRight, Scissors, ArrowLeft } from 'lucide-react';
+import { Shield, Lock, Mail, User, ArrowRight, Scissors, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getErrorMessage } from '../../api/client';
 
 export const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState('admin@barber.uz');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,16 +74,16 @@ export const AdminLogin: React.FC = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
-              Admin Email
+              Admin Login
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@barber.uz"
+                placeholder="Login (masalan: dino911)"
                 className="w-full bg-[#0b0d10] border border-gray-700 focus:border-gold-500 text-white pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-500"
               />
             </div>

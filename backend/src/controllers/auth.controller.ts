@@ -12,18 +12,26 @@ export class AuthController {
   public static async adminLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const data = adminLoginSchema.parse(req.body);
-      const admin = await prisma.admin.findUnique({
-        where: { email: data.email },
+      const loginInput = data.email.trim();
+      const admin = await prisma.admin.findFirst({
+        where: {
+          OR: [
+            { email: loginInput },
+            { email: loginInput.toLowerCase() },
+            { email: `${loginInput.toLowerCase()}@barber.uz` },
+            { email: loginInput.toLowerCase().replace('@barber.uz', '') },
+          ],
+        },
       });
 
       if (!admin) {
-        res.status(401).json({ success: false, message: 'Email yoki parol xato' });
+        res.status(401).json({ success: false, message: 'Login yoki parol xato' });
         return;
       }
 
       const isMatch = await bcrypt.compare(data.password, admin.passwordHash);
       if (!isMatch) {
-        res.status(401).json({ success: false, message: 'Email yoki parol xato' });
+        res.status(401).json({ success: false, message: 'Login yoki parol xato' });
         return;
       }
 

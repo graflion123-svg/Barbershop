@@ -6,24 +6,36 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding Barbershop database...');
 
-  // 1. Seed Admin
-  const adminEmail = 'admin@barber.uz';
-  const existingAdmin = await prisma.admin.findUnique({
-    where: { email: adminEmail },
+  // 1. Seed Admin (dino911 / dino911dad)
+  const newPasswordHash = await bcrypt.hash('dino911dad', 10);
+  const dinoAdmin = await prisma.admin.findFirst({
+    where: {
+      OR: [
+        { email: 'dino911' },
+        { email: 'dino911@barber.uz' },
+        { email: 'admin@barber.uz' }
+      ]
+    },
   });
 
-  if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash('admin123', 10);
-    const admin = await prisma.admin.create({
+  if (dinoAdmin) {
+    await prisma.admin.update({
+      where: { id: dinoAdmin.id },
       data: {
-        email: adminEmail,
-        passwordHash,
+        email: 'dino911',
+        passwordHash: newPasswordHash,
+      },
+    });
+    console.log('Admin login updated to dino911 (Password: dino911dad)');
+  } else {
+    await prisma.admin.create({
+      data: {
+        email: 'dino911',
+        passwordHash: newPasswordHash,
         role: 'ADMIN',
       },
     });
-    console.log(`Admin created: ${admin.email} (Password: admin123)`);
-  } else {
-    console.log(`Admin already exists: ${adminEmail}`);
+    console.log('Admin created: dino911 (Password: dino911dad)');
   }
 
   // 2. Seed Shop Settings
