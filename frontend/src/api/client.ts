@@ -1,8 +1,13 @@
 import axios from 'axios';
 
 // Dynamically determine API base URL so Render, phone, local IP, or localhost all connect seamlessly
+const LIVE_BACKEND_URL = 'https://barbershop-backend-3au6.onrender.com/api';
+
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL) {
+  if (
+    import.meta.env.VITE_API_BASE_URL &&
+    import.meta.env.VITE_API_BASE_URL !== 'https://barbershop-backend.onrender.com/api'
+  ) {
     return import.meta.env.VITE_API_BASE_URL;
   }
   if (typeof window !== 'undefined') {
@@ -17,10 +22,10 @@ const getApiBaseUrl = () => {
     ) {
       return `http://${host}:5000/api`;
     }
-    // Default fallback in production if environment variable was not specified
-    return '/api';
+    // Live production Render backend URL
+    return LIVE_BACKEND_URL;
   }
-  return 'http://localhost:5000/api';
+  return LIVE_BACKEND_URL;
 };
 
 export const API_BASE_URL = getApiBaseUrl();
