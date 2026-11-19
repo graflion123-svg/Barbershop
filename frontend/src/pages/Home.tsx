@@ -13,7 +13,8 @@ import {
   Coffee,
   Check,
   Star,
-  Navigation
+  Navigation,
+  ExternalLink
 } from 'lucide-react';
 import { api } from '../api/client';
 import { Barber, Service, ShopSettings } from '../types';
@@ -379,92 +380,116 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. LOCATION & YANDEX MAPS SECTION */}
-      <section className="py-24 bg-[#0c0e12] relative">
+      {/* 5. LOCATION & CONTACT SECTION */}
+      <section className="py-24 bg-[#0c0e12] relative border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left: Contact & Location details */}
-            <div className="lg:col-span-5 space-y-6">
-              <span className="text-xs uppercase tracking-widest text-gold-500 font-semibold">
-                Bizni Topish Oson
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
-                MANZIL VA XARITA
-              </h2>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Barbershopimiz poytaxt markazida, avtoturargoh va qulay transport bog'lamasiga ega hududda joylashgan.
-              </p>
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="text-xs uppercase tracking-widest text-gold-500 font-semibold">
+              Bizni Topish Oson
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white mt-2">
+              MANZIL VA ALOQA
+            </h2>
+            <div className="w-16 h-0.5 bg-gold-500 mx-auto mt-3 mb-4" />
+            <p className="text-sm text-gray-400">
+              Qulay joylashuv, bepul avtoturargoh va mehmondo'st shinam muhit.
+            </p>
+          </div>
 
-              <div className="space-y-4 pt-2">
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-charcoal-800 border border-white/5">
-                  <MapPin className="w-5 h-5 text-gold-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-xs text-gray-400 uppercase block font-medium">Manzil</span>
-                    <span className="text-sm text-white font-medium">{settings?.address || "Toshkent shahar, Mirobod tumani, Amir Temur shoh ko'chasi, 42-uy"}</span>
-                  </div>
+          {/* 3 Luxury Info Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {/* Address Card */}
+            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-white/5 flex flex-col justify-between hover:border-gold-500/30 transition-all">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 mb-5">
+                  <MapPin className="w-6 h-6" />
                 </div>
-
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-charcoal-800 border border-white/5">
-                  <Phone className="w-5 h-5 text-gold-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-xs text-gray-400 uppercase block font-medium">Telefon Raqami</span>
-                    <a href={`tel:${settings?.phone || '+998901234567'}`} className="text-sm text-white font-medium hover:text-gold-400 transition-colors">
-                      {settings?.phone || '+998 90 123 45 67'}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-charcoal-800 border border-white/5">
-                  <Clock className="w-5 h-5 text-gold-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-xs text-gray-400 uppercase block font-medium">Ish Rejimi</span>
-                    <span className="text-sm text-white font-medium">{settings?.openingHours || '09:00 — 21:00'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Direct Buttons to Maps */}
-              <div className="pt-2 flex flex-wrap gap-4">
-                <a
-                  href={settings?.yandexMapsUrl || 'https://yandex.com/maps'}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-gold-500 hover:bg-gold-400 shadow-lg shadow-gold-500/20 flex items-center gap-2 transition-all"
-                >
-                  <Navigation className="w-4 h-4" />
-                  <span>Yandex Xarita: Yo'l Ko'rsatish</span>
-                </a>
-
-                {settings?.googleMapsUrl && (
-                  <a
-                    href={settings.googleMapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-5 py-3 rounded-xl font-semibold text-xs uppercase tracking-wider text-white bg-charcoal-800 border border-gray-700 hover:border-gold-500/40 transition-all flex items-center gap-2"
-                  >
-                    <span>Google Maps</span>
-                  </a>
-                )}
+                <span className="text-xs text-gray-400 uppercase tracking-wider block font-semibold mb-1">
+                  Barbershop Manzili
+                </span>
+                <p className="text-base text-white font-medium leading-relaxed">
+                  {settings?.address || "Toshkent shahar, Mirobod tumani, Amir Temur shoh ko'chasi, 42-uy"}
+                </p>
               </div>
             </div>
 
-            {/* Right: Embedded Yandex Map Widget / Interactive Frame */}
-            <div className="lg:col-span-7">
-              <div className="relative rounded-2xl overflow-hidden border border-gold-500/30 shadow-2xl h-[300px] sm:h-[420px] bg-charcoal-900">
-                <iframe
-                  title="Yandex Maps Location"
-                  src="https://yandex.com/map-widget/v1/?ll=69.279737%2C41.311158&z=16&l=map&pt=69.279737,41.311158,pm2grm"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  allowFullScreen
-                  className="w-full h-full filter invert-[0.9] hue-rotate-[190deg] contrast-[1.1]"
-                />
-                <div className="absolute top-4 left-4 p-3 rounded-xl bg-black/80 backdrop-blur-md border border-gold-500/40 text-xs text-white flex items-center gap-2 shadow-lg">
-                  <div className="w-2.5 h-2.5 rounded-full bg-gold-500 animate-ping" />
-                  <span className="font-semibold">{settings?.shopName || 'THE NOBLE BLADE'}</span>
+            {/* Phone Card */}
+            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-white/5 flex flex-col justify-between hover:border-gold-500/30 transition-all">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 mb-5">
+                  <Phone className="w-6 h-6" />
                 </div>
+                <span className="text-xs text-gray-400 uppercase tracking-wider block font-semibold mb-1">
+                  Telefon Raqami
+                </span>
+                <a
+                  href={`tel:${settings?.phone || '+998901234567'}`}
+                  className="text-lg text-white font-bold hover:text-gold-400 transition-colors block"
+                >
+                  {settings?.phone || '+998 90 123 45 67'}
+                </a>
+                <p className="text-xs text-gray-400 mt-2">
+                  Qabulga yozilish yoki savollar bo'yicha bog'lanishingiz mumkin.
+                </p>
               </div>
+            </div>
+
+            {/* Hours Card */}
+            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-white/5 flex flex-col justify-between hover:border-gold-500/30 transition-all">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 mb-5">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <span className="text-xs text-gray-400 uppercase tracking-wider block font-semibold mb-1">
+                  Ish Rejimi
+                </span>
+                <p className="text-base text-gold-400 font-bold">
+                  {settings?.openingHours || 'Dushanba - Yakshanba: 09:00 — 21:00'}
+                </p>
+                <p className="text-xs text-gray-400 mt-2">
+                  Dam olish kunlarisiz, siz uchun qulay vaqtda xizmat ko'rsatamiz.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Maps Action Buttons */}
+          <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-gold-500/25 text-center max-w-3xl mx-auto shadow-2xl shadow-gold-500/10">
+            <h3 className="font-serif text-xl sm:text-2xl font-bold text-white mb-2">
+              Xarita orqali yo'nalish (marshrut) olish
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-300 mb-8 max-w-lg mx-auto leading-relaxed">
+              Tugmani bosing va o'zingizga qulay xarita ilovasida barbershopgacha bo'lgan eng tez marshrutni oching:
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
+                href={
+                  settings?.yandexMapsUrl ||
+                  `https://yandex.com/maps/?text=${encodeURIComponent(settings?.address || 'Toshkent Barbershop')}`
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-gradient-to-r from-gold-400 via-gold-500 to-gold-600 hover:from-gold-300 hover:to-gold-500 shadow-xl shadow-gold-500/25 flex items-center justify-center gap-2.5 transition-all"
+              >
+                <Navigation className="w-4 h-4" />
+                <span>Yandex Xarita: Yo'nalish olish</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              <a
+                href={
+                  settings?.googleMapsUrl ||
+                  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings?.address || 'Toshkent Barbershop')}`
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl font-semibold text-xs uppercase tracking-wider text-white bg-white/5 border border-gold-500/30 hover:bg-gold-500/10 hover:border-gold-500 flex items-center justify-center gap-2.5 transition-all"
+              >
+                <MapPin className="w-4 h-4 text-gold-400" />
+                <span>Google Maps orqali ko'rish</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
         </div>
