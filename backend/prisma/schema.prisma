@@ -1,0 +1,128 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  fullName  String
+  phone     String    @unique
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+
+  @@map("users")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+
+  @@map("admins")
+}
+
+model Barber {
+  id          String           @id @default(uuid())
+  fullName    String
+  phone       String
+  image       String
+  experience  String
+  description String
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  bookings    Booking[]
+  schedules   BarberSchedule[]
+  daysOff     BarberDayOff[]
+
+  @@map("barbers")
+}
+
+model Service {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  image       String
+  price       Float
+  duration    Int       @default(45) // standard minutes
+  category    String    @default("Standard")
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  bookings    Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id            String   @id @default(uuid())
+  userId        String
+  barberId      String
+  serviceId     String
+  date          String   // Format: YYYY-MM-DD
+  startTime     String   // Format: HH:mm
+  endTime       String   // Format: HH:mm
+  peopleCount   Int      @default(1)
+  totalDuration Int      // total minutes (e.g. 1 = 45, 2 = 90, 3 = 135)
+  totalPrice    Float
+  status        String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  barber  Barber  @relation(fields: [barberId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@index([barberId, date])
+  @@index([userId])
+  @@map("bookings")
+}
+
+model BarberSchedule {
+  id         String  @id @default(uuid())
+  barberId   String
+  dayOfWeek  Int     // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime  String  // e.g. "09:00"
+  endTime    String  // e.g. "21:00"
+  breakStart String? // e.g. "13:00"
+  breakEnd   String? // e.g. "14:00"
+  isWorking  Boolean @default(true)
+
+  barber Barber @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  @@unique([barberId, dayOfWeek])
+  @@map("barber_schedules")
+}
+
+model BarberDayOff {
+  id       String  @id @default(uuid())
+  barberId String
+  date     String  // Format: YYYY-MM-DD
+  reason   String?
+
+  barber Barber @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  @@unique([barberId, date])
+  @@map("barber_days_off")
+}
+
+model ShopSettings {
+  id             String   @id @default("default")
+  shopName       String
+  logo           String
+  address        String
+  phone          String
+  yandexMapsUrl  String
+  googleMapsUrl  String?
+  openingHours   String
+  instagramUrl   String?
+  telegramUrl    String?
+  description    String?
+  updatedAt      DateTime @updatedAt
+
+  @@map("shop_settings")
+}

@@ -1,0 +1,18 @@
+import { Router } from 'express';
+import authRoutes from './auth.routes';
+import bookingRoutes from './booking.routes';
+import barberRoutes from './barber.routes';
+import serviceRoutes from './service.routes';
+import adminRoutes from './admin.routes';
+import settingsRoutes from './settings.routes';
+
+const router = Router();
+
+router.use('/auth', authRoutes);
+router.use('/bookings', bookingRoutes);
+router.use('/barbers', barberRoutes);
+router.use('/services', serviceRoutes);
+router.use('/admin', adminRoutes);
+router.use('/settings', settingsRoutes);
+
+export default router;

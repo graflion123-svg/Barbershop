@@ -1,0 +1,12 @@
+{
+  "name": "barbershop-platform",
+  "version": "1.0.0",
+  "description": "Professional Barbershop Customer Website and Admin Dashboard Platform",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "seed": "npm run prisma:seed --prefix backend"
+  }
+}
