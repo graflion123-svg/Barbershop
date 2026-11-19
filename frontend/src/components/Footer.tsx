@@ -1,21 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Scissors, MapPin, Phone, Clock, Instagram, Send, Shield, Navigation } from 'lucide-react';
-import { api } from '../api/client';
-import { ShopSettings } from '../types';
+import { useSettings } from '../context/SettingsContext';
 
 export const Footer: React.FC = () => {
-  const [settings, setSettings] = useState<ShopSettings | null>(null);
-
-  useEffect(() => {
-    api.get('/settings')
-      .then(res => {
-        if (res.data.success) {
-          setSettings(res.data.settings);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const { settings } = useSettings();
+  const [logoError, setLogoError] = useState(false);
 
   return (
     <footer className="bg-[#090b0e] border-t border-gold-500/15 pt-16 pb-8 text-gray-400">
@@ -24,10 +14,19 @@ export const Footer: React.FC = () => {
           {/* Col 1: About */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500">
-                <Scissors className="w-5 h-5 -rotate-45" />
-              </div>
-              <span className="font-serif text-xl font-bold tracking-wider text-white">
+              {settings?.logo && !logoError ? (
+                <img
+                  src={settings.logo}
+                  alt={settings.shopName || 'Logo'}
+                  onError={() => setLogoError(true)}
+                  className="w-10 h-10 rounded-xl object-cover border border-gold-500/30"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500">
+                  <Scissors className="w-5 h-5 -rotate-45" />
+                </div>
+              )}
+              <span className="font-serif text-xl font-bold tracking-wider text-white uppercase">
                 {settings?.shopName || 'THE NOBLE BLADE'}
               </span>
             </div>

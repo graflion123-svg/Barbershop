@@ -43,31 +43,44 @@ export class SettingsController {
     try {
       const data = shopSettingsSchema.partial().parse(req.body);
 
-      const existing = await prisma.shopSettings.findFirst();
-      const id = existing?.id || 'default';
-
-      const updated = await prisma.shopSettings.upsert({
-        where: { id },
-        create: {
-          id: 'default',
-          shopName: data.shopName || 'THE NOBLE BLADE',
-          logo: data.logo || '/images/logo.png',
-          address: data.address || 'Toshkent sh., Amir Temur ko\'chasi 42',
-          phone: data.phone || '+998 90 123 45 67',
-          yandexMapsUrl: data.yandexMapsUrl || 'https://yandex.com/maps',
-          googleMapsUrl: data.googleMapsUrl,
-          openingHours: data.openingHours || '09:00 - 21:00',
-          instagramUrl: data.instagramUrl,
-          telegramUrl: data.telegramUrl,
-          description: data.description,
-        },
-        update: data,
-      });
+      let settings = await prisma.shopSettings.findFirst();
+      if (settings) {
+        settings = await prisma.shopSettings.update({
+          where: { id: settings.id },
+          data: {
+            shopName: data.shopName || settings.shopName,
+            logo: (data.logo !== undefined && data.logo !== null) ? data.logo : settings.logo,
+            address: (data.address !== undefined && data.address !== null) ? data.address : settings.address,
+            phone: (data.phone !== undefined && data.phone !== null) ? data.phone : settings.phone,
+            yandexMapsUrl: (data.yandexMapsUrl !== undefined && data.yandexMapsUrl !== null) ? data.yandexMapsUrl : settings.yandexMapsUrl,
+            googleMapsUrl: data.googleMapsUrl,
+            openingHours: (data.openingHours !== undefined && data.openingHours !== null) ? data.openingHours : settings.openingHours,
+            instagramUrl: data.instagramUrl,
+            telegramUrl: data.telegramUrl,
+            description: data.description,
+          },
+        });
+      } else {
+        settings = await prisma.shopSettings.create({
+          data: {
+            shopName: data.shopName || 'THE NOBLE BLADE',
+            logo: data.logo || 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=200&auto=format&fit=crop&q=80',
+            address: data.address || "Toshkent shahar, Mirobod tumani, Amir Temur shoh ko'chasi, 42-uy",
+            phone: data.phone || '+998 90 123 45 67',
+            yandexMapsUrl: data.yandexMapsUrl || 'https://yandex.com/maps',
+            googleMapsUrl: data.googleMapsUrl,
+            openingHours: data.openingHours || '09:00 — 21:00',
+            instagramUrl: data.instagramUrl,
+            telegramUrl: data.telegramUrl,
+            description: data.description,
+          },
+        });
+      }
 
       res.json({
         success: true,
         message: 'Barbershop sozlamalari yangilandi',
-        settings: updated,
+        settings,
       });
     } catch (error) {
       next(error);

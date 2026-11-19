@@ -13,9 +13,12 @@ import {
   Shield
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 
 export const AdminSidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({ isOpen = false, onClose }) => {
   const { admin, logoutAdmin } = useAuth();
+  const { settings } = useSettings();
+  const [logoError, setLogoError] = React.useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -44,15 +47,24 @@ export const AdminSidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> 
         {/* Brand header */}
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center text-gold-500 shadow-lg">
-              <Shield className="w-5 h-5" />
-            </div>
+            {settings?.logo && !logoError ? (
+              <img
+                src={settings.logo}
+                alt={settings.shopName || 'Logo'}
+                onError={() => setLogoError(true)}
+                className="w-10 h-10 rounded-xl object-cover border border-gold-500/40 shadow-lg"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center text-gold-500 shadow-lg">
+                <Shield className="w-5 h-5" />
+              </div>
+            )}
             <div>
               <span className="font-serif text-lg font-bold text-white tracking-wider block">
                 ADMIN PANEL
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-gold-500/80 font-semibold block">
-                The Noble Blade
+              <span className="text-[10px] uppercase tracking-widest text-gold-500/80 font-semibold block truncate max-w-[130px]">
+                {settings?.shopName || 'The Noble Blade'}
               </span>
             </div>
           </div>

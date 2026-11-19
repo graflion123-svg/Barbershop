@@ -17,11 +17,12 @@ import {
 } from 'lucide-react';
 import { api } from '../api/client';
 import { Barber, Service, ShopSettings } from '../types';
+import { useSettings } from '../context/SettingsContext';
 
 export const Home: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [barbers, setBarbers] = useState<Barber[]>([]);
-  const [settings, setSettings] = useState<ShopSettings | null>(null);
+  const { settings } = useSettings();
   const [loading, setLoading] = useState(true);
 
   const fallbackImg = 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&auto=format&fit=crop&q=80';
@@ -32,15 +33,13 @@ export const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [servicesRes, barbersRes, settingsRes] = await Promise.all([
+        const [servicesRes, barbersRes] = await Promise.all([
           api.get('/services'),
           api.get('/barbers'),
-          api.get('/settings'),
         ]);
 
         if (servicesRes.data.success) setServices(servicesRes.data.services);
         if (barbersRes.data.success) setBarbers(barbersRes.data.barbers);
-        if (settingsRes.data.success) setSettings(settingsRes.data.settings);
       } catch (err) {
         console.error('Error fetching home data:', err);
       } finally {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CustomerAuthModal } from './components/CustomerAuthModal';
@@ -43,8 +44,9 @@ const PublicLayout: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <SettingsProvider>
+        <BrowserRouter>
+          <Routes>
           {/* Public Customer Routes */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
@@ -74,7 +76,8 @@ export const App: React.FC = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </SettingsProvider>
+  </AuthProvider>
   );
 };
 

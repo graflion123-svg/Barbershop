@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Scissors, User as UserIcon, Calendar, Menu, X, Shield, Phone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { customer, openAuthModal, logoutCustomer } = useAuth();
+  const { settings } = useSettings();
+  const [logoError, setLogoError] = useState(false);
   const location = useLocation();
 
   const navLinks = [
@@ -23,12 +26,21 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl bg-gold-500/10 border border-gold-500/40 flex items-center justify-center text-gold-500 group-hover:scale-105 group-hover:border-gold-500 transition-all duration-300 shadow-lg shadow-gold-500/10">
-              <Scissors className="w-6 h-6 transform -rotate-45" />
-            </div>
+            {settings?.logo && !logoError ? (
+              <img
+                src={settings.logo}
+                alt={settings.shopName || 'Logo'}
+                onError={() => setLogoError(true)}
+                className="w-11 h-11 rounded-xl object-cover border border-gold-500/40 shadow-lg shadow-gold-500/10 group-hover:scale-105 transition-transform"
+              />
+            ) : (
+              <div className="w-11 h-11 rounded-xl bg-gold-500/10 border border-gold-500/40 flex items-center justify-center text-gold-500 group-hover:scale-105 group-hover:border-gold-500 transition-all duration-300 shadow-lg shadow-gold-500/10">
+                <Scissors className="w-6 h-6 transform -rotate-45" />
+              </div>
+            )}
             <div>
-              <span className="font-serif text-xl sm:text-2xl font-bold tracking-wider text-white group-hover:text-gold-400 transition-colors">
-                THE NOBLE BLADE
+              <span className="font-serif text-xl sm:text-2xl font-bold tracking-wider text-white group-hover:text-gold-400 transition-colors uppercase">
+                {settings?.shopName || 'THE NOBLE BLADE'}
               </span>
               <span className="block text-[10px] uppercase tracking-[0.25em] text-gold-500/80 font-medium">
                 Exclusive Barbershop

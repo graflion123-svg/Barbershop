@@ -70,14 +70,14 @@ export const barberDayOffSchema = z.object({
 });
 
 export const shopSettingsSchema = z.object({
-  shopName: z.string().min(2),
-  logo: z.string().min(1),
-  address: z.string().min(5),
-  phone: z.string().min(7),
-  yandexMapsUrl: z.string().url(),
-  googleMapsUrl: z.string().url().optional().nullable(),
-  openingHours: z.string().min(3),
-  instagramUrl: z.string().optional().nullable(),
-  telegramUrl: z.string().optional().nullable(),
-  description: z.string().optional().nullable(),
+  shopName: z.string().min(1, "Barbershop nomi kiritilishi kerak"),
+  logo: z.string().optional().nullable().or(z.literal('')),
+  address: z.string().optional().nullable().or(z.literal('')),
+  phone: z.string().optional().nullable().or(z.literal('')),
+  yandexMapsUrl: z.string().optional().nullable().or(z.literal('')),
+  googleMapsUrl: z.string().optional().nullable().or(z.literal('')),
+  openingHours: z.string().optional().nullable().or(z.literal('')),
+  instagramUrl: z.string().optional().nullable().or(z.literal('')),
+  telegramUrl: z.string().optional().nullable().or(z.literal('')),
+  description: z.string().optional().nullable().or(z.literal('')),
 });
