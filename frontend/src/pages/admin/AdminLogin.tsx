@@ -106,12 +106,6 @@ export const AdminLogin: React.FC = () => {
             </div>
           </div>
 
-          {/* Seed credentials hint */}
-          <div className="p-3 rounded-xl bg-gold-500/10 border border-gold-500/20 text-[11px] text-gray-400">
-            <span className="font-semibold text-gold-400 block mb-0.5">Boshlang'ich tizim kaliti:</span>
-            Email: <span className="text-white font-mono">admin@barber.uz</span> | Parol: <span className="text-white font-mono">admin123</span>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
