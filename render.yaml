@@ -29,7 +29,6 @@ services:
     runtime: static
     name: barbershop-frontend
     rootDir: frontend
-    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
