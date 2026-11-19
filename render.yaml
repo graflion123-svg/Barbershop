@@ -25,7 +25,8 @@ services:
   # ===================================================
   # 2. FRONTEND STATIC SITE (React + Vite + Tailwind)
   # ===================================================
-  - type: static
+  - type: web
+    runtime: static
     name: barbershop-frontend
     rootDir: frontend
     plan: free
