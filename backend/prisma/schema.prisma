@@ -70,6 +70,7 @@ model Booking {
   totalDuration Int      // total minutes (e.g. 1 = 45, 2 = 90, 3 = 135)
   totalPrice    Float
   status        String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  reminderSent  Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -122,7 +123,24 @@ model ShopSettings {
   instagramUrl   String?
   telegramUrl    String?
   description    String?
+  eskizEmail     String?
+  eskizPassword  String?
+  eskizToken     String?
+  smsEnabled     Boolean  @default(true)
   updatedAt      DateTime @updatedAt
 
   @@map("shop_settings")
 }
+
+model OtpVerification {
+  id        String   @id @default(uuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@map("otp_verifications")
+}
+

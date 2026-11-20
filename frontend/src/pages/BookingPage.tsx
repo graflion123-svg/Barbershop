@@ -47,6 +47,15 @@ export const BookingPage: React.FC = () => {
   const [fullName, setFullName] = useState<string>(customer?.fullName || '');
   const [phone, setPhone] = useState<string>(customer?.phone || '+998 ');
 
+  // SMS OTP state
+  const [otpSent, setOtpSent] = useState<boolean>(false);
+  const [otpCode, setOtpCode] = useState<string>('');
+  const [sendingOtp, setSendingOtp] = useState<boolean>(false);
+  const [otpTimer, setOtpTimer] = useState<number>(0);
+  const [demoOtpCode, setDemoOtpCode] = useState<string | null>(null);
+  const [isPhoneVerified, setIsPhoneVerified] = useState<boolean>(false);
+  const [verifyingOtp, setVerifyingOtp] = useState<boolean>(false);
+
   // Loaded data
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -131,6 +140,74 @@ export const BookingPage: React.FC = () => {
   const totalDurationMinutes = peopleCount * 45;
   const totalPrice = (selectedService?.price || 0) * peopleCount;
 
+  // OTP timer effect
+  useEffect(() => {
+    let interval: any;
+    if (otpTimer > 0) {
+      interval = setInterval(() => {
+        setOtpTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpTimer]);
+
+  // Send SMS OTP code
+  const handleSendOtp = async () => {
+    setError(null);
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length < 9) {
+      setError("Iltimos, to'liq telefon raqamingizni kiriting (+998...)");
+      return;
+    }
+
+    try {
+      setSendingOtp(true);
+      const res = await api.post('/auth/send-otp', { phone: phone.trim() });
+      if (res.data.success) {
+        setOtpSent(true);
+        setOtpTimer(60);
+        if (res.data.demoCode) {
+          setDemoOtpCode(res.data.demoCode);
+          setOtpCode(res.data.demoCode);
+        }
+      }
+    } catch (err: any) {
+      setError(getErrorMessage(err));
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  // Verify OTP Code
+  const handleVerifyOtp = async () => {
+    setError(null);
+    if (!otpCode || otpCode.trim().length < 4) {
+      setError("Iltimos, 4 xonali tasdiqlash kodini kiriting");
+      return;
+    }
+
+    try {
+      setVerifyingOtp(true);
+      const res = await api.post('/auth/verify-otp', {
+        phone: phone.trim(),
+        code: otpCode.trim(),
+        fullName: fullName.trim(),
+      });
+      if (res.data.success) {
+        setIsPhoneVerified(true);
+        if (res.data.user) {
+          try {
+            await identifyCustomer(res.data.user.fullName, res.data.user.phone);
+          } catch {}
+        }
+      }
+    } catch (err: any) {
+      setError(getErrorMessage(err));
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
   // Handle final submit
   const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,17 +228,20 @@ export const BookingPage: React.FC = () => {
       return;
     }
 
+    // Require SMS OTP verification if not already verified and not customer
+    if (!isPhoneVerified && !customer) {
+      if (!otpSent) {
+        setError("Iltimos, avval 'SMS Kod Olish' tugmasini bosib telefoningizni tasdiqlang");
+        return;
+      }
+      if (!otpCode || otpCode.trim().length < 4) {
+        setError("Iltimos, SMS orqali kelgan 4 xonali tasdiqlash kodini kiriting");
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
-
-      // Auto identify/save customer in background if needed
-      if (!customer) {
-        try {
-          await identifyCustomer(fullName.trim(), phone.trim());
-        } catch {
-          // Continue booking anyway
-        }
-      }
 
       const res = await api.post('/bookings', {
         barberId: selectedBarberId,
@@ -171,10 +251,14 @@ export const BookingPage: React.FC = () => {
         peopleCount,
         fullName: fullName.trim(),
         phone: phone.trim(),
+        otpCode: otpCode.trim() || undefined,
       });
 
       if (res.data.success) {
         setBookingSuccess(res.data.booking);
+        try {
+          await identifyCustomer(fullName.trim(), phone.trim());
+        } catch {}
       }
     } catch (err: any) {
       setError(getErrorMessage(err));
@@ -305,6 +389,20 @@ export const BookingPage: React.FC = () => {
                   {bookingSuccess.totalPrice?.toLocaleString()} UZS
                 </span>
               </div>
+            </div>
+
+            {/* SMS Notification Info Box */}
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 text-left space-y-2 mb-8 text-xs text-emerald-300">
+              <div className="flex items-center gap-2 font-semibold text-emerald-200">
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>SMS xabarnomalar muvaffaqiyatli rejalashtirildi:</span>
+              </div>
+              <p className="pl-6 text-gray-300">
+                📲 Telefoningizga qabul tafsilotlari yozilgan tasdiqlovchi SMS yuborildi.
+              </p>
+              <p className="pl-6 text-gold-400 font-medium">
+                ⏰ Qabul vaqtingizga 1 soat qolganda sizga eslatma SMS yuboriladi!
+              </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -714,24 +812,112 @@ export const BookingPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-300 uppercase tracking-wider mb-1.5">
-                        Telefon Raqamingiz *
-                      </label>
-                      <div className="relative">
-                        <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="tel"
-                          required
-                          placeholder="+998 90 123 45 67"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full bg-[#0b0d10] border border-gray-700 focus:border-gold-500 text-white pl-11 pr-4 py-3 rounded-xl focus:outline-none focus:ring-1 focus:ring-gold-500 text-sm"
-                        />
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-medium text-gray-300 uppercase tracking-wider">
+                          Telefon Raqamingiz *
+                        </label>
+                        {(isPhoneVerified || customer) && (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                            <Check className="w-3 h-3" /> Raqam tasdiqlangan
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <input
+                            type="tel"
+                            required
+                            disabled={isPhoneVerified}
+                            placeholder="+998 90 123 45 67"
+                            value={phone}
+                            onChange={(e) => {
+                              setPhone(e.target.value);
+                              setIsPhoneVerified(false);
+                            }}
+                            className="w-full bg-[#0b0d10] border border-gray-700 focus:border-gold-500 text-white pl-11 pr-4 py-3 rounded-xl focus:outline-none focus:ring-1 focus:ring-gold-500 text-sm disabled:opacity-70"
+                          />
+                        </div>
+                        {!isPhoneVerified && !customer && (
+                          <button
+                            type="button"
+                            onClick={handleSendOtp}
+                            disabled={sendingOtp || otpTimer > 0}
+                            className="px-4 py-3 bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 border border-gold-500/40 rounded-xl text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-40 shrink-0"
+                          >
+                            {sendingOtp ? (
+                              <span className="inline-block w-4 h-4 border-2 border-gold-400 border-t-transparent rounded-full animate-spin" />
+                            ) : otpTimer > 0 ? (
+                              `${otpTimer}s`
+                            ) : otpSent ? (
+                              "Kodni qayta olish"
+                            ) : (
+                              "SMS Kod Olish"
+                            )}
+                          </button>
+                        )}
                       </div>
                       <p className="text-[11px] text-gray-500 mt-1">
-                        Bron haqida ma'lumot shu raqam bilan kabinetingizda saqlanadi.
+                        Bron qilish va eslatma SMS olish uchun telefon raqamingizni kiriting.
                       </p>
                     </div>
+
+                    {/* SMS OTP Code Input Box */}
+                    {otpSent && !isPhoneVerified && !customer && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 rounded-xl bg-gold-500/10 border border-gold-500/40 space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-bold text-gold-400 uppercase tracking-wider">
+                            SMS Tasdiqlash Kodi
+                          </label>
+                          {otpTimer > 0 && (
+                            <span className="text-[11px] text-gray-400">
+                              Qayta yuborish: {otpTimer}s
+                            </span>
+                          )}
+                        </div>
+
+                        {demoOtpCode && (
+                          <div className="p-2.5 rounded-lg bg-black/40 border border-gold-500/30 text-xs flex items-center justify-between">
+                            <span className="text-gray-300">
+                              💡 Kod: <strong className="font-mono text-gold-400 text-sm">{demoOtpCode}</strong>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setOtpCode(demoOtpCode)}
+                              className="text-[11px] text-gold-400 hover:text-white underline font-medium"
+                            >
+                              Avtomatik to'ldirish
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            maxLength={6}
+                            placeholder="Kod (masalan: 1234)"
+                            value={otpCode}
+                            onChange={(e) => setOtpCode(e.target.value)}
+                            className="w-full bg-[#0b0d10] border border-gray-700 focus:border-gold-500 text-center font-mono tracking-widest text-lg font-bold text-white py-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-gold-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleVerifyOtp}
+                            disabled={verifyingOtp || otpCode.trim().length < 4}
+                            className="px-5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-black font-bold text-xs uppercase tracking-wider disabled:opacity-40 transition-colors shrink-0"
+                          >
+                            {verifyingOtp ? "..." : "Tasdiqlash"}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-gray-400">
+                          Telefoningizga kelgan 4 xonali SMS kodni kiriting.
+                        </p>
+                      </motion.div>
+                    )}
 
                     <div className="pt-2 text-xs text-gray-400 flex items-start gap-2">
                       <ShieldCheck className="w-4 h-4 text-gold-500 shrink-0 mt-0.5" />

@@ -58,6 +58,9 @@ export class SettingsController {
             instagramUrl: data.instagramUrl,
             telegramUrl: data.telegramUrl,
             description: data.description,
+            eskizEmail: data.eskizEmail !== undefined ? data.eskizEmail : settings.eskizEmail,
+            eskizPassword: data.eskizPassword !== undefined ? data.eskizPassword : settings.eskizPassword,
+            smsEnabled: data.smsEnabled !== undefined ? data.smsEnabled : settings.smsEnabled,
           },
         });
       } else {
@@ -73,6 +76,9 @@ export class SettingsController {
             instagramUrl: data.instagramUrl,
             telegramUrl: data.telegramUrl,
             description: data.description,
+            eskizEmail: data.eskizEmail || null,
+            eskizPassword: data.eskizPassword || null,
+            smsEnabled: data.smsEnabled !== undefined ? data.smsEnabled : true,
           },
         });
       }

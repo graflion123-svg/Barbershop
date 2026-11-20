@@ -12,4 +12,8 @@ router.get('/admin/profile', authenticateAdmin, AuthController.getAdminProfile);
 router.post('/customer/identify', AuthController.customerIdentify);
 router.get('/customer/lookup', AuthController.lookupCustomer);
 
+// SMS OTP Verification
+router.post('/send-otp', AuthController.sendOtp);
+router.post('/verify-otp', AuthController.verifyOtp);
+
 export default router;

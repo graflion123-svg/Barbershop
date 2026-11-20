@@ -322,6 +322,50 @@ export const AdminSettings: React.FC = () => {
           </div>
         </div>
 
+        {/* SMS Xabarnomalar (Eskiz.uz) */}
+        <div className="space-y-4 pt-4 border-t border-gray-800">
+          <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+            <h3 className="font-serif text-lg font-bold text-gold-400">
+              SMS Xabarnomalar va Eslatmalar (Eskiz.uz)
+            </h3>
+            <span className="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-medium">
+              OTP & 1 Soatlik Eslatma
+            </span>
+          </div>
+
+          <p className="text-xs text-gray-400 leading-relaxed">
+            Mijozlar bron qilayotganda ularning telefoniga SMS tasdiqlash kodi boradi va bron vaqtiga <strong>1 soat qolganda</strong> avtomatik eslatma SMS yuboriladi. O'zbekistonda haqiqiy SMS xabarlar yetkazilishi uchun <a href="https://eskiz.uz" target="_blank" rel="noreferrer" className="text-gold-400 underline font-semibold">Eskiz.uz</a> hisobingiz email va parolini kiriting.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">
+                Eskiz.uz Email
+              </label>
+              <input
+                type="email"
+                value={settings.eskizEmail || ''}
+                onChange={(e) => handleChange('eskizEmail', e.target.value)}
+                placeholder="masalan: admin@barber.uz"
+                className="w-full bg-[#0b0d10] border border-gray-700 text-white px-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">
+                Eskiz.uz Parol
+              </label>
+              <input
+                type="password"
+                value={settings.eskizPassword || ''}
+                onChange={(e) => handleChange('eskizPassword', e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full bg-[#0b0d10] border border-gray-700 text-white px-3 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold-500"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end pt-4 border-t border-gray-800">
           <button
             type="submit"

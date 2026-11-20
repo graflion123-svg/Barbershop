@@ -1,6 +1,7 @@
 import { createApp } from './app';
 import { config } from './config';
 import { prisma } from './prisma/client';
+import { ReminderWorker } from './services/reminder.worker';
 
 const app = createApp();
 
@@ -9,6 +10,9 @@ async function startServer() {
     // Test database connection
     await prisma.$connect();
     console.log('PostgreSQL bazasiga muvaffaqiyatli ulandi (Asia/Tashkent).');
+
+    // Start 1-hour SMS reminder worker
+    ReminderWorker.start();
 
     app.listen(config.port, '0.0.0.0', () => {
       console.log(`=================================================`);

@@ -7,6 +7,7 @@ import {
   updateBookingStatusSchema,
 } from '../validators';
 import { AuthenticatedRequest } from '../types';
+import { SmsService } from '../services/sms.service';
 
 export class BookingController {
   /**
@@ -46,6 +47,18 @@ export class BookingController {
     try {
       const data = createBookingSchema.parse(req.body);
 
+      // If OTP code is provided, verify it
+      if (data.otpCode) {
+        const isOtpValid = await SmsService.verifyOtp(data.phone, data.otpCode);
+        if (!isOtpValid) {
+          res.status(400).json({
+            success: false,
+            message: "SMS orqali yuborilgan tasdiqlash kodi noto'g'ri yoki eskirgan.",
+          });
+          return;
+        }
+      }
+
       const booking = await BookingEngine.createBookingWithLock({
         barberId: data.barberId,
         serviceId: data.serviceId,
@@ -55,6 +68,12 @@ export class BookingController {
         fullName: data.fullName,
         phone: data.phone,
       });
+
+      // Send immediate confirmation SMS to customer
+      const confirmText = `Barbershop: Hurmatli ${data.fullName}, qabulingiz muvaffaqiyatli band qilindi! Sana: ${booking.date}, Soat: ${booking.startTime}. Sartarosh: ${booking.barber.fullName}. Qabuldan 1 soat oldin eslatma yuboramiz.`;
+      SmsService.sendSms(data.phone, confirmText).catch((e) =>
+        console.error('Confirmation SMS error:', e)
+      );
 
       res.status(201).json({
         success: true,

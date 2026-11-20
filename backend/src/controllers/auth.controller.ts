@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma/client';
-import { adminLoginSchema, customerAuthSchema } from '../validators';
+import { adminLoginSchema, customerAuthSchema, sendOtpSchema, verifyOtpSchema } from '../validators';
 import { signAdminToken, signUserToken } from '../utils/jwt';
 import { AuthenticatedRequest } from '../types';
+import { SmsService } from '../services/sms.service';
 
 export class AuthController {
   /**
@@ -175,6 +176,96 @@ export class AuthController {
         success: true,
         exists: !!user,
         user: user || null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Send SMS OTP verification code
+   */
+  public static async sendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const data = sendOtpSchema.parse(req.body);
+      const { code, isRealSms } = await SmsService.generateAndSendOtp(data.phone);
+
+      res.json({
+        success: true,
+        message: isRealSms
+          ? "Tasdiqlash kodi telefoningizga SMS orqali yuborildi."
+          : "Tasdiqlash kodi yuborildi.",
+        isRealSms,
+        // In simulation / demo mode (when no Eskiz credentials configured), return code so testing is never blocked
+        demoCode: isRealSms ? undefined : code,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Verify SMS OTP code and authenticate/register customer
+   */
+  public static async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const data = verifyOtpSchema.parse(req.body);
+      const isValid = await SmsService.verifyOtp(data.phone, data.code);
+
+      if (!isValid) {
+        res.status(400).json({
+          success: false,
+          message: "Tasdiqlash kodi noto'g'ri yoki uning muddati (5 daqiqa) o'tgan.",
+        });
+        return;
+      }
+
+      const cleanedPhone = data.phone.trim();
+      let user = await prisma.user.findUnique({
+        where: { phone: cleanedPhone },
+        include: {
+          _count: {
+            select: { bookings: true },
+          },
+        },
+      });
+
+      if (!user && data.fullName) {
+        user = await prisma.user.create({
+          data: {
+            phone: cleanedPhone,
+            fullName: data.fullName.trim(),
+          },
+          include: {
+            _count: {
+              select: { bookings: true },
+            },
+          },
+        });
+      }
+
+      const token = user
+        ? signUserToken({
+            id: user.id,
+            phone: user.phone,
+            fullName: user.fullName,
+          })
+        : null;
+
+      res.json({
+        success: true,
+        verified: true,
+        message: "Telefon raqamingiz muvaffaqiyatli tasdiqlandi!",
+        user: user
+          ? {
+              id: user.id,
+              fullName: user.fullName,
+              phone: user.phone,
+              createdAt: user.createdAt,
+              visitsCount: user._count.bookings,
+            }
+          : null,
+        token,
       });
     } catch (error) {
       next(error);

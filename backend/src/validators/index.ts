@@ -16,6 +16,16 @@ export const getAvailableTimesSchema = z.object({
   peopleCount: z.coerce.number().int().min(1, "Kamida 1 kishi bo'lishi kerak").max(5, "Ko'pi bilan 5 kishi bo'lishi mumkin").default(1),
 });
 
+export const sendOtpSchema = z.object({
+  phone: z.string().min(7, "Telefon raqami to'liq kiritilishi kerak"),
+});
+
+export const verifyOtpSchema = z.object({
+  phone: z.string().min(7, "Telefon raqami to'liq kiritilishi kerak"),
+  code: z.string().min(4, "Kod kamida 4 xonali bo'lishi kerak"),
+  fullName: z.string().optional(),
+});
+
 export const createBookingSchema = z.object({
   barberId: z.string().uuid("Yaroqli barber ID tanlanishi kerak"),
   serviceId: z.string().uuid("Yaroqli xizmat tanlanishi kerak"),
@@ -24,6 +34,7 @@ export const createBookingSchema = z.object({
   peopleCount: z.coerce.number().int().min(1).max(5).default(1),
   fullName: z.string().min(2, "Mijoz ismi kiritilishi kerak"),
   phone: z.string().min(7, "Telefon raqami kiritilishi kerak"),
+  otpCode: z.string().optional(),
 });
 
 export const updateBookingStatusSchema = z.object({
@@ -80,4 +91,7 @@ export const shopSettingsSchema = z.object({
   instagramUrl: z.string().optional().nullable().or(z.literal('')),
   telegramUrl: z.string().optional().nullable().or(z.literal('')),
   description: z.string().optional().nullable().or(z.literal('')),
+  eskizEmail: z.string().optional().nullable().or(z.literal('')),
+  eskizPassword: z.string().optional().nullable().or(z.literal('')),
+  smsEnabled: z.boolean().optional(),
 });

@@ -73,6 +73,7 @@ export interface Booking {
   totalDuration: number;
   totalPrice: number;
   status: BookingStatus;
+  reminderSent?: boolean;
   createdAt: string;
   user: User;
   barber: Barber;
@@ -91,6 +92,9 @@ export interface ShopSettings {
   instagramUrl?: string | null;
   telegramUrl?: string | null;
   description?: string | null;
+  eskizEmail?: string | null;
+  eskizPassword?: string | null;
+  smsEnabled?: boolean;
 }
 
 export interface TimeSlot {
